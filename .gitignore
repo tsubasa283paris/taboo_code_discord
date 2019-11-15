@@ -1,5 +1,8 @@
-# Byte-compiled / optimized / DLL files
+# Byte-compiled
 __pycache__/
 
-# access token described txt file
-access_token.txt
+# access token and channel ID described txt file
+local_settings.txt
+
+# nothing
+.vscode/

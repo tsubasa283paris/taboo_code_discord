@@ -1,5 +1,6 @@
 import discord
 import asyncio
+import random
 from source.PlayerMaster import PlayerMaster
 from source.Commands import Commands
 
@@ -76,7 +77,8 @@ class TCClient(discord.Client):
     
     def set_codes(self, args, author):
         if self.phase == "codes_edit":
-            # ===codes.txtの書き換え処理===
+            with open(self.code_path, "w") as f:
+                f.write("\n".join(self.codes))
             self.phase == "standby"
             ret_mes = "待機モードに戻りました。"
         else:
@@ -105,16 +107,22 @@ class TCClient(discord.Client):
                  + "\n暗殺対象のIDがわからないときは" + COMMANDS["SHOW_PLAYERS"].get_command()
                  + "で確認しましょう。"
                  + "\n:spy: グッドラック！"]]
-        # ===コードの配置処理===
         for player in self.playermaster.players:
-            # ===他のプレイヤーのコードをretに===
-            ret_list.append([player.get_name(), ret])
+            randid = random.randrange(len(self.codes))
+            player.set_code(self.codes[randid])
+        for i, player in enumerate(self.playermaster.players):
+            ret_mes = ":page_facing_up: 他のエージェントのタブーコードです。彼らが秘密を漏らさないか、注意深く監視してください。"
+            other = self.playermaster.players[:]
+            del other[i]
+            ret_mes += "\n".join([
+                f"{other[j].get_name()}: {other[j].get_code()}" for j in range(len(other))
+            ])
+            ret_list.append([player.get_name(), ret_mes])
         yield ret_list
 
     def hit(self, args, author):
-        for player in self.playermaster.players:
-            # なんかPlayerオブジェクトのIDいらなくね？
-            if player.get_id() == args[0]:
+        for i, player in enumerate(self.playermaster.players):
+            if i + 1 == args[0]:
                 hitname = player.get_name()
         self.phase = "standby"
         yield "gamech", f":boom: バカめ！タブーを犯した{hitname}は処分されてしまった。\nゲーム終了、{hitname}の負け！"
@@ -166,5 +174,10 @@ class TCClient(discord.Client):
     def load_channel(self, id):
         self.gamech = self.get_channel(id)
     
-    def load_codes(self, codes):
-        self.codes = codes
+    def load_codes(self, code_path):
+        self.code_path = code_path
+
+        self.codes = []
+        with open(self.code_path, "r") as f:
+            for line in f:
+                self.codes.append(line)

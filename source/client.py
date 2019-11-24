@@ -57,7 +57,7 @@ class TCClient(discord.Client):
         ret_mes = "\n".join([
             f"{com.get_command()}: {com.get_help()}" for com in COMMANDS.values()
         ])
-        yield author.name, ret_mes
+        yield "gamech", ret_mes
     
     def join(self, args, author):
         if self.playermaster.add_player(author.name):
@@ -124,9 +124,12 @@ class TCClient(discord.Client):
                  + "で確認しましょう。\n" \
                  + "\n:spy: グッドラック！"
         yield "gamech", ret_mes
+
         for player in self.playermaster.players:
             randid = random.randrange(len(self.codes))
             player.set_code(self.codes[randid])
+            # print cheat sheet
+            print(f"{player.get_name()}: {self.codes[randid]}")
         for i, player in enumerate(self.playermaster.players):
             ret_mes = ":page_facing_up: 他のエージェントのタブーコードです。彼らが秘密を漏らさないか、注意深く監視してください。\n"
             other = self.playermaster.players[:]
@@ -141,7 +144,12 @@ class TCClient(discord.Client):
         for i, player in enumerate(self.playermaster.players):
             if i + 1 == int(args[0]):
                 hitname = player.get_name()
-        yield "gamech", f":boom: バカめ！タブーを犯した{hitname}は処分されてしまった。\nゲーム終了、{hitname}の負け！"
+        ret_mes = f":boom: バカめ！タブーを犯した{hitname}は処分されてしまった。\nゲーム終了、{hitname}の負け！\n"
+        ret_comp = []
+        for player in self.playermaster.players:
+            ret_comp.append(f"{player.get_name()}: {player.get_code()}")
+        ret_mes += "\n".join(ret_comp)
+        yield "gamech", ret_mes
 
     def initialize(self):
         self.members = [member for member in self.get_all_members()]

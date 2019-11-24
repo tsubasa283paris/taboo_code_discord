@@ -4,5 +4,8 @@ __pycache__/
 # access token and channel ID described txt file
 /local_settings.txt
 
+# taboo codes
+/codes.txt
+
 # nothing
 .vscode/
